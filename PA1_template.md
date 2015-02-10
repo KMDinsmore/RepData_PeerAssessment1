@@ -1,18 +1,31 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-```{r setoptions}
+# Reproducible Research: Peer Assessment 1
+
+```r
 library(knitr) 
 ##opts_chunk$set(echo=FALSE)
 ```
 ## Loading and preprocessing the data
 
 
-```{r}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(lattice)
 
 fileUrl<-"http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
@@ -37,10 +50,11 @@ unique_days<-unique(cc_steps[,2])
 number_of_days<-length(unique_days)
 
 steps_per_day<-data.frame()
-```       
+```
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 for (i in 1:number_of_days) {
     day<-unique_days[i]
     steps_per_day[i,1]<-as.character(day)
@@ -49,17 +63,32 @@ for (i in 1:number_of_days) {
 }
 
 hist(steps_per_day[,2])
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 mean_steps<-mean(steps_per_day[,2])
 print(mean_steps)
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 median_steps<-median(steps_per_day[,2])
 print(median_steps)
 ```
 
+```
+## [1] 10765
+```
+
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 steps_by_time<-data.frame()
 
 unq_times<-unique(activity[,3])
@@ -74,20 +103,35 @@ for (i in 1:num_of_times) {
 colnames(steps_by_time)<-c("Interval", "Total.Steps", "Complete.Cases")
 
 with(steps_by_time, plot(Interval, Total.Steps, xlab = "", type = "l", pch=NA))
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 max_val<-which.max(steps_by_time[,2])
 interval_message<-paste("Highest number of steps are in the", steps_by_time[max_val,1], "interval")
 print(interval_message)
 ```
 
+```
+## [1] "Highest number of steps are in the 835 interval"
+```
+
 
 ## Imputing missing values
-```{r}
+
+```r
 missing_vals <- is.na(activity[,1])
 num_of_missing_vals<-sum(missing_vals)
 val_message <- paste("Number of missing values:", num_of_missing_vals)
 print(val_message)
+```
 
+```
+## [1] "Number of missing values: 2304"
+```
+
+```r
 rows_to_replace <- activity[missing_vals,]
 
 for (i in 1:num_of_missing_vals){
@@ -118,19 +162,34 @@ for (i in 1:number_of_days) {
 }
 
 hist(steps_per_day_filled[,2])
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+```r
 mean_steps_filled<-round(mean(steps_per_day_filled[,2]), digits=0)
 filled_mean_message<-paste("Mean steps (filled):", mean_steps_filled)
 print(filled_mean_message)
+```
 
+```
+## [1] "Mean steps (filled): 10766"
+```
+
+```r
 median_steps_filled<-median(steps_per_day_filled[,2])
 filled_median_message<-paste("Median steps (filled):", median_steps_filled)
 print(filled_median_message)
 ```
 
+```
+## [1] "Median steps (filled): 10762"
+```
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+
+```r
 for (h in 1:number_of_days)    {
     day_of_week<-weekdays(unique_days[h])
     
@@ -171,4 +230,7 @@ means_df<-rbind(weekday_means_df, weekend_means_df)
 
 p<-xyplot(mean_of_wdays ~ interval |Weekend.or.day, data=means_df, type="l", layout = c(1,2))
 print(p)
-```{r}
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+

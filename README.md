@@ -82,15 +82,36 @@ Show any code that is needed to
 
 2. Process/transform the data (if necessary) into a format suitable for your analysis
 
+               colClasses=c( "numeric", "character", "numeric"), sep =",", na="NA")
+```
 
 ### What is mean total number of steps taken per day?
 
 For this part of the assignment, you can ignore the missing values in
 the dataset.
+activity[,2]<-as.Date(activity[,2])
 
-1. Make a histogram of the total number of steps taken each day
+cc_steps<-activity[complete.cases(activity[,1]),]
 
-2. Calculate and report the **mean** and **median** total number of steps taken per day
+unique_days<-unique(cc_steps[,2])
+number_of_days<-length(unique_days)
+
+steps_per_day<-data.frame()
+
+for (i in 1:number_of_days) {
+    day<-unique_days[i]
+    steps_per_day[i,1]<-as.character(day)
+    steps_in_a_day<-filter(cc_steps, cc_steps$date==day)
+    steps_per_day[i,2]<-sum(steps_in_a_day[,1], na.rm=TRUE)
+}
+
+hist(steps_per_day[,2])
+
+mean_steps<-mean(steps_per_day[,2])
+print(mean_steps)
+
+median_steps<-median(steps_per_day[,2])
+print(median_steps)
 
 
 ### What is the average daily activity pattern?
