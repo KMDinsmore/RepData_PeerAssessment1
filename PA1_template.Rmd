@@ -124,7 +124,7 @@ with(steps_by_time, plot(Interval, Total.Steps, xlab = "Time Interval",
 
 ##  Find and print max value
 max_val<-which.max(steps_by_time[,2])
-interval_message<-paste("Highest number of steps are in the", steps_by_time[max_val,1], "interval")
+interval_message<-paste("Highest number of steps is in the", steps_by_time[max_val,1], "interval")
 print(interval_message)
 ```
 
