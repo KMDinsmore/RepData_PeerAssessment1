@@ -1,12 +1,12 @@
 # Reproducible Research: Peer Assessment 1
 
-```r
-library(knitr) 
-##opts_chunk$set(echo=FALSE)
-```
 ## Loading and preprocessing the data
 
-
+In this section, the script checks to see if the file to be analyzed or the 
+zip containing the file is present.  If not, the appropriate actions are taken. 
+Then the data for the dates is properly formatted and rows with NAs are removed. 
+Finally, the script finds each day that has valid observations and counts the 
+instances thereof. 
 
 ```r
 ##  As written, I use two packages in addition to the base
@@ -72,6 +72,10 @@ steps_per_day<-data.frame()
 ```
 
 ## What is mean total number of steps taken per day?
+The script cycles through each valid day inserting a row that contains the 
+date, total number of steps observed.  Using this data it prints a histogram of 
+the frequency of a range of total steps per day.  Finally, it uses the table to 
+calcuate and round to the nearest whole number the mean and median steps per day. 
 
 ```r
 ##  For each day, create a sum of the total steps
@@ -83,7 +87,8 @@ for (i in 1:number_of_days) {
 }
 
 ##  Print a histogram of steps per day
-hist(steps_per_day[,2])
+hist(steps_per_day[,2], xlab= "Steps per day",
+     main ="Histogram of the total number of steps taken each day")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
@@ -91,25 +96,33 @@ hist(steps_per_day[,2])
 ```r
 ##  Calculate mean steps per day, then print
 mean_steps<-round(mean(steps_per_day[,2]), digits=0)
-print(mean_steps)
+mean_message<-paste("Mean steps:", mean_steps)
+print(mean_message)
 ```
 
 ```
-## [1] 10766
+## [1] "Mean steps: 10766"
 ```
 
 ```r
 ##  Calculate median steps per day, then print
 median_steps<-median(steps_per_day[,2])
-print(median_steps)
+median_message<-paste("Median steps:", median_steps)
+print(median_message)
 ```
 
 ```
-## [1] 10765
+## [1] "Median steps: 10765"
 ```
 
 
 ## What is the average daily activity pattern?
+To find the average daily activity pattern, the script gathers each interval, 
+then loops through each interval summing the number of steps observed, and 
+places this in a table along with the interval.  Using the base system, a time 
+series plot is used to display this information.  Then the the  5-minute 
+interval, that on average across all the days in the dataset, contains the maximum 
+number of steps is calculated and displayed. 
 
 ```r
 ##  Create data frame to hold steps for each time interval
@@ -125,14 +138,16 @@ for (i in 1:num_of_times) {
     time<-unq_times[i]
     steps_by_time[i,1]<-time
     steps_in_an_interval <- filter(cc_steps, cc_steps$interval==time)
-    steps_by_time[i,2]<-sum(steps_in_an_interval[,1], na.rm=TRUE)
+    steps_by_time[i,2]<-mean(steps_in_an_interval[,1], na.rm=TRUE)
     steps_by_time[i,3]<-length(steps_in_an_interval[,1])
 }
 ##  label the columns
 colnames(steps_by_time)<-c("Interval", "Total.Steps", "Complete.Cases")
 
 ##  Plot total steps by time
-with(steps_by_time, plot(Interval, Total.Steps, xlab = "", type = "l", pch=NA))
+with(steps_by_time, plot(Interval, Total.Steps, xlab = "Time Interval",
+                         ylab="Average Number of Steps", main="Average Steps per 5-minute interval", 
+                         type = "l", pch=NA))
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
@@ -150,6 +165,12 @@ print(interval_message)
 
 
 ## Imputing missing values
+The script counts and displays takes the rows removed in earlier (due to the 
+presence of NAs).  It then loops through these rows and inserts the average
+value from that time interval (calculated above), these are then incorporated
+into the full table.  We then calculate steps per day, as above, using the 
+table with imputed data.  A histogram of this data is displayed along with the 
+mean (to nearest whole number) and median.
 
 ```r
 ##  For this section I chose to average the number of steps for a timer interval
@@ -175,13 +196,9 @@ rows_to_replace <- activity[missing_vals,]
 ##  For each missing row with a missing value, find the entry for total steps
 ##  and divide that by complete cases, put that into rows_to_replace data frame
 for (i in 1:num_of_missing_vals){
-    bad_row<-rows_to_replace[i,]
-    val_to_match<-bad_row[1,3]
-
-    row_to_calc<-steps_by_time[which(steps_by_time$Interval == val_to_match), ]
-    
-    new_val<-round(row_to_calc$Total.Steps/row_to_calc$Complete.Cases,
-                   digits = 0)
+    val_to_match<-rows_to_replace[i,3]
+    new_val<-round(steps_by_time[which(steps_by_time$Interval == 
+                                       val_to_match), 2])
     rows_to_replace[i,1]<-new_val
     
 }
@@ -209,7 +226,8 @@ for (i in 1:number_of_days) {
 }
 
 #   Print a histogram of the new total steps data
-hist(steps_per_day_filled[,2])
+hist(steps_per_day_filled[,2], xlab="Steps per day",
+     main ="Histogram of the total number of steps with imputed data")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
@@ -238,6 +256,11 @@ print(filled_median_message)
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+Now the script determine whether each observation is a weekend or weekday, then 
+associates an appropriate factor variable with that row, as well as labeling 
+the column. The data is then broken up by this factor and the mean of the steps 
+for each time interval is calculated and placed in a data frame.  The tables are 
+joined and then using lattice a plot is made comparing Weekends vs. Weekdays.
 
 ```r
 ##  For each days (which was calculated and counted above), determine if it was
@@ -293,7 +316,8 @@ means_df<-rbind(weekday_means_df, weekend_means_df)
 
 ##  Plot, using lattice, mean number of steps seperated by weekend and weekday
 ##  Finally, print
-p<-xyplot(mean_of_wdays ~ interval |Weekend.or.day, data=means_df, type="l", layout = c(1,2))
+p<-xyplot(mean_of_wdays ~ interval |Weekend.or.day, data=means_df, type="l", layout = c(1,2), 
+          ylab="Average Number of Steps", xlab="Time interval")
 print(p)
 ```
 
