@@ -238,7 +238,7 @@ print(filled_median_message)</code></pre>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
-<p>Now the script determine whether each observation is a weekend or weekday, then associates an appropriate factor variable with that row, as well as labeling the column. The data is then broken up by this factor and the mean of the steps for each time interval is calculated and placed in a data frame. The tables are joined and then using lattice a plot is made comparing Weekends vs. Weekdays.</p>
+<p>Now the script determines whether each observation is a weekend or weekday, then associates an appropriate factor variable with that row. The data is then broken up by this factor and the mean of the steps for each time interval is calculated and placed in a data frame. Then using lattice package a plot is made comparing Weekends vs. Weekdays.</p>
 <pre class="r"><code>##  For each days (which was calculated and counted above), determine if it was
 ##  a week day or end, and in a new column, place the appropriate factor variable
 for (h in 1:number_of_days)    {
@@ -264,31 +264,18 @@ colnames(filled_table)[4]&lt;-c(&quot;Weekend.or.day&quot;)
 
 ##  Convert all values in new column to type factor
 filled_table&lt;-transform(filled_table, Weekend.or.day = factor(Weekend.or.day))
+partial_means&lt;-data.frame()
+means_df&lt;-data.frame()
+day_or_end&lt;-c(&quot;Weekday&quot;, &quot;Weekend&quot;)
 
-
-##  Select all values of type Weekday
-days&lt;-filter(filled_table, Weekend.or.day==&quot;Weekday&quot;)
-
-##  Now, calculate the mean of the steps for each interval, place that in a 
-##  data frame and convert these means to numeric type which was lost when
-##  using tapply.  Finally, label the columns
-weekday_means&lt;-tapply(days$steps, days$interval, mean)
-weekday_means_df&lt;-data.frame(weekday_means)
-weekday_means_df[,2]&lt;-as.numeric(rownames(weekday_means_df))
-weekday_means_df[,3]&lt;-&quot;Weekday&quot;
-colnames(weekday_means_df)&lt;-c(&quot;mean_of_wdays&quot;, &quot;interval&quot;, &quot;Weekend.or.day&quot;)
-
-
-##  Now do the same for type weekend
-ends&lt;-filter(filled_table, Weekend.or.day==&quot;Weekend&quot;)
-weekend_means&lt;-tapply(ends$steps, ends$interval, mean)
-weekend_means_df&lt;-data.frame(weekend_means)
-weekend_means_df[,2]&lt;-as.numeric(rownames(weekend_means_df))
-weekend_means_df[,3]&lt;-&quot;Weekend&quot;
-colnames(weekend_means_df)&lt;-c(&quot;mean_of_wdays&quot;, &quot;interval&quot;, &quot;Weekend.or.day&quot;)
-
-##  Bind the two tables together
-means_df&lt;-rbind(weekday_means_df, weekend_means_df)
+for (i in 1:2)    {
+days&lt;-filter(filled_table, Weekend.or.day==day_or_end[i])
+partial_means[1:num_of_times,1]&lt;-unq_times
+partial_means[,2]&lt;-tapply(days$steps, days$interval, mean)
+partial_means[,3]&lt;-day_or_end[i]
+means_df&lt;-rbind(means_df, partial_means)
+}
+colnames(means_df)&lt;-c(&quot;interval&quot;, &quot;mean_of_wdays&quot;, &quot;Weekend.or.day&quot;)
 
 ##  Plot, using lattice, mean number of steps seperated by weekend and weekday
 ##  Finally, print

@@ -1,33 +1,21 @@
-# Reproducible Research: Peer Assessment 1
-
-## Loading and preprocessing the data
-
-In this section, the script checks to see if the file to be analyzed or the 
+---
+    title: "Reproducible Research: Peer Assessment 1"
+output: 
+    html_document:
+    keep_md: true
+---
+    
+    ## Loading and preprocessing the data
+    
+    In this section, the script checks to see if the file to be analyzed or the 
 zip containing the file is present.  If not, the appropriate actions are taken. 
 Then the data for the dates is properly formatted and rows with NAs are removed. 
 Finally, the script finds each day that has valid observations and counts the 
 instances thereof. 
-
-```r
+```{r}
 ##  As written, I use two packages in addition to the base
 ##  they are listed below
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(lattice)
 
 
@@ -35,11 +23,11 @@ fileUrl<-"http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 
 ##  First, we look for the file in the working directory
 if (!file.exists("activity.csv")){
-
-##  If not, we see if the zip file containing the data is present    
+    
+    ##  If not, we see if the zip file containing the data is present    
     if (!file.exists("activity.zip")){
         
-##  If not, download the file and notify user        
+        ##  If not, download the file and notify user        
         download.file(fileUrl, destfile="activity.zip", mode = "wb")
         dateDownloaded <- date()
         dlMessage <- paste("Activity monitoring data successfully downloaded:",
@@ -47,7 +35,7 @@ if (!file.exists("activity.csv")){
         print(dlMessage)
     }
     
-##  Now unzip and notify user  
+    ##  Now unzip and notify user  
     unzip ("activity.zip")
     dateUnzipped<- date()
     zipMessage <- paste("Activity monitoring data successfully uzniped:", dateUnzipped)
@@ -56,7 +44,7 @@ if (!file.exists("activity.csv")){
 
 ##  read the file from the csv into a dataframe
 activity <- read.csv("activity.csv", header=TRUE,
-                       colClasses=c( "numeric", "character", "numeric"), sep =",", na="NA")
+                     colClasses=c( "numeric", "character", "numeric"), sep =",", na="NA")
 
 ##  Convert date to date format
 activity[,2]<-as.Date(activity[,2])
@@ -69,15 +57,14 @@ unique_days<-unique(cc_steps[,2])
 number_of_days<-length(unique_days)
 
 steps_per_day<-data.frame()
-```
+```       
 
 ## What is mean total number of steps taken per day?
 The script cycles through each valid day inserting a row that contains the 
 date, total number of steps observed.  Using this data it prints a histogram of 
 the frequency of a range of total steps per day.  Finally, it uses the table to 
 calcuate and round to the nearest whole number the mean and median steps per day. 
-
-```r
+```{r}
 ##  For each day, create a sum of the total steps
 for (i in 1:number_of_days) {
     day<-unique_days[i]
@@ -89,30 +76,16 @@ for (i in 1:number_of_days) {
 ##  Print a histogram of steps per day
 hist(steps_per_day[,2], xlab= "Steps per day",
      main ="Histogram of the total number of steps taken each day")
-```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
-
-```r
 ##  Calculate mean steps per day, then print
 mean_steps<-round(mean(steps_per_day[,2]), digits=0)
 mean_message<-paste("Mean steps:", mean_steps)
 print(mean_message)
-```
 
-```
-## [1] "Mean steps: 10766"
-```
-
-```r
 ##  Calculate median steps per day, then print
 median_steps<-median(steps_per_day[,2])
 median_message<-paste("Median steps:", median_steps)
 print(median_message)
-```
-
-```
-## [1] "Median steps: 10765"
 ```
 
 
@@ -123,8 +96,8 @@ places this in a table along with the interval.  Using the base system, a time
 series plot is used to display this information.  Then the the  5-minute 
 interval, that on average across all the days in the dataset, contains the maximum 
 number of steps is calculated and displayed. 
+```{r}
 
-```r
 ##  Create data frame to hold steps for each time interval
 steps_by_time<-data.frame()
 
@@ -148,31 +121,22 @@ colnames(steps_by_time)<-c("Interval", "Total.Steps", "Complete.Cases")
 with(steps_by_time, plot(Interval, Total.Steps, xlab = "Time Interval",
                          ylab="Average Number of Steps", main="Average Steps per 5-minute interval", 
                          type = "l", pch=NA))
-```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
-
-```r
 ##  Find and print max value
 max_val<-which.max(steps_by_time[,2])
 interval_message<-paste("Highest number of steps are in the", steps_by_time[max_val,1], "interval")
 print(interval_message)
 ```
 
-```
-## [1] "Highest number of steps are in the 835 interval"
-```
-
 
 ## Imputing missing values
 The script counts and displays takes the rows removed in earlier (due to the 
-presence of NAs).  It then loops through these rows and inserts the average
+                                                                  presence of NAs).  It then loops through these rows and inserts the average
 value from that time interval (calculated above), these are then incorporated
 into the full table.  We then calculate steps per day, as above, using the 
 table with imputed data.  A histogram of this data is displayed along with the 
 mean (to nearest whole number) and median.
-
-```r
+```{r}
 ##  For this section I chose to average the number of steps for a timer interval
 ##  to replace the missing values
 
@@ -180,16 +144,10 @@ mean (to nearest whole number) and median.
 missing_vals <- is.na(activity[,1])
 
 ##  Count those rows and print
-num_of_missing_vals<-sum(missing_vals)
+num_of_missing_vals<-length(missing_vals)
 val_message <- paste("Number of missing values:", num_of_missing_vals)
 print(val_message)
-```
 
-```
-## [1] "Number of missing values: 2304"
-```
-
-```r
 #   Create data frame of NA's
 rows_to_replace <- activity[missing_vals,]
 
@@ -198,7 +156,7 @@ rows_to_replace <- activity[missing_vals,]
 for (i in 1:num_of_missing_vals){
     val_to_match<-rows_to_replace[i,3]
     new_val<-round(steps_by_time[which(steps_by_time$Interval == 
-                                       val_to_match), 2])
+                                           val_to_match), 2])
     rows_to_replace[i,1]<-new_val
     
 }
@@ -228,41 +186,26 @@ for (i in 1:number_of_days) {
 #   Print a histogram of the new total steps data
 hist(steps_per_day_filled[,2], xlab="Steps per day",
      main ="Histogram of the total number of steps with imputed data")
-```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
-
-```r
 #   Calculate, print mean of filled table
 mean_steps_filled<-round(mean(steps_per_day_filled[,2]), digits=0)
 filled_mean_message<-paste("Mean steps (filled):", mean_steps_filled)
 print(filled_mean_message)
-```
 
-```
-## [1] "Mean steps (filled): 10766"
-```
-
-```r
 #   Calculate, print median of filled table
 median_steps_filled<-median(steps_per_day_filled[,2])
 filled_median_message<-paste("Median steps (filled):", median_steps_filled)
 print(filled_median_message)
 ```
 
-```
-## [1] "Median steps (filled): 10762"
-```
-
 
 ## Are there differences in activity patterns between weekdays and weekends?
-Now the script determines whether each observation is a weekend or weekday, then 
-associates an appropriate factor variable with that row. The data is then broken 
-up by this factor and the mean of the steps for each time interval is calculated 
-and placed in a data frame.  Then using lattice package a plot is made comparing 
-Weekends vs. Weekdays.
-
-```r
+Now the script determine whether each observation is a weekend or weekday, then 
+associates an appropriate factor variable with that row, as well as labeling 
+the column. The data is then broken up by this factor and the mean of the steps 
+for each time interval is calculated and placed in a data frame.  The tables are 
+joined and then using lattice a plot is made comparing Weekends vs. Weekdays.
+```{r}
 ##  For each days (which was calculated and counted above), determine if it was
 ##  a week day or end, and in a new column, place the appropriate factor variable
 for (h in 1:number_of_days)    {
@@ -288,25 +231,35 @@ colnames(filled_table)[4]<-c("Weekend.or.day")
 
 ##  Convert all values in new column to type factor
 filled_table<-transform(filled_table, Weekend.or.day = factor(Weekend.or.day))
-partial_means<-data.frame()
-means_df<-data.frame()
-day_or_end<-c("Weekday", "Weekend")
 
-for (i in 1:2)    {
-days<-filter(filled_table, Weekend.or.day==day_or_end[i])
-partial_means[1:num_of_times,1]<-unq_times
-partial_means[,2]<-tapply(days$steps, days$interval, mean)
-partial_means[,3]<-day_or_end[i]
-means_df<-rbind(means_df, partial_means)
-}
-colnames(means_df)<-c("interval", "mean_of_wdays", "Weekend.or.day")
+
+##  Select all values of type Weekday
+days<-filter(filled_table, Weekend.or.day=="Weekday")
+
+##  Now, calculate the mean of the steps for each interval, place that in a 
+##  data frame and convert these means to numeric type which was lost when
+##  using tapply.  Finally, label the columns
+weekday_means<-tapply(days$steps, days$interval, mean)
+weekday_means_df<-data.frame(weekday_means)
+weekday_means_df[,2]<-as.numeric(rownames(weekday_means_df))
+weekday_means_df[,3]<-"Weekday"
+colnames(weekday_means_df)<-c("mean_of_wdays", "interval", "Weekend.or.day")
+
+
+##  Now do the same for type weekend
+ends<-filter(filled_table, Weekend.or.day=="Weekend")
+weekend_means<-tapply(ends$steps, ends$interval, mean)
+weekend_means_df<-data.frame(weekend_means)
+weekend_means_df[,2]<-as.numeric(rownames(weekend_means_df))
+weekend_means_df[,3]<-"Weekend"
+colnames(weekend_means_df)<-c("mean_of_wdays", "interval", "Weekend.or.day")
+
+##  Bind the two tables together
+means_df<-rbind(weekday_means_df, weekend_means_df)
 
 ##  Plot, using lattice, mean number of steps seperated by weekend and weekday
 ##  Finally, print
 p<-xyplot(mean_of_wdays ~ interval |Weekend.or.day, data=means_df, type="l", layout = c(1,2), 
           ylab="Average Number of Steps", xlab="Time interval")
 print(p)
-```
-
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
-
+```{r}
